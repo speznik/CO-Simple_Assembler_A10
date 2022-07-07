@@ -403,7 +403,7 @@ i=halt_index+1
 while_flag=0
 while(i<len(input_list) and while_flag==0):
     if input_list[i]!="just_an_empty_line_69420":
-        print(input_list[i])
+        #print(input_list[i])
         error_dict[line_number+1]="Halt not used as last instruction; line "+str(line_number)
         while_flag=1
     i+=1
