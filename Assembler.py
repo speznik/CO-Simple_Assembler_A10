@@ -127,7 +127,7 @@ for i in range(len(temp)):
     else:
         lines.append(temp[i])
 #print(lines)
-		
+
 text = '\n'.join(lines)
 #print(text)
 #print(type(text))
@@ -248,7 +248,7 @@ def opcode_B(list_input,line_number):
     return instructions_dict[list_input[0]] + register_dict[list_input[1]] + corrected(float(list_input[2][1:]))
 
 def opcode_C(list_input,line_number):
-    if((list_input[1] or list_input[2]) not in register_dict):
+    if((list_input[1] or list_input[2]) not in register_dict_FLAGS):
         error_dict[line_number]="Register not defined; line "+str(line_number)
         global_error_flag=1
         return
@@ -333,7 +333,7 @@ if flag_length==0:
                 found_halt=1
             #    if line_number!=len(input_list)-:
             #        error_dict[line_number]="Halt not used as last instruction; line "+str(line_number)
-  
+ 
             if command[0][-1]==":":
                 label_list.append(command[0])
                 flag_label=1 #if yes then setting flag=1
@@ -407,7 +407,7 @@ if flag_length==0:
                     else:
                         global_error_flag=1
                         error_dict[line_number]="Invalid input length for Type A Instruction; line " +str(line_number)
-                
+               
                 elif (command[0] in opcodeB_list) and ('$' in command[2]):
                     if len(command)==3:
                         out_list.append(opcode_B(command,line_number))
