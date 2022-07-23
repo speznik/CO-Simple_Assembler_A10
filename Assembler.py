@@ -109,7 +109,7 @@ def corrected(a):
     outt=(int_float(a)+dec_float(a))[1:]
     for i in range(5-len(outt)):
         outt+="0"
-    return bin(len(int_float(a))+2)+outt
+    return bin(len(int_float(a))-1)+outt
 
 lines = [] #for taking input
 temp=[]
@@ -244,6 +244,9 @@ def opcode_B(list_input,line_number):
         error_dict[line_number]="Illegal use of flags; line "+str(line_number)
         global_error_flag=1
         return
+
+    if '.' not in list_input[2][1:]:
+        return instructions_dict[list_input[0]] + register_dict[list_input[1]] + binary(list_input[2])
 
     return instructions_dict[list_input[0]] + register_dict[list_input[1]] + corrected(float(list_input[2][1:]))
 
