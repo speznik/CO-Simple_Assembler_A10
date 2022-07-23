@@ -2,12 +2,12 @@ import sys
 import os
 import site
 
-instructions_dict={"add":"10000","sub":"10001","mov":"10010","ld":"10100","st":"10101","mul":"10110","div":"10111","rs":"11000","ls":"11001","xor":"11010","or":"11011","and":"11100","not":"11101","cmp":"11110","jmp":"11111","jlt":"01100","jgt":"01101","je":"01111","hlt":"01010"}
-instructions=["add","sub","mov","ld","st","mul","div","rs","ls","xor","or","and","not","cmp","jmp","jlt","jgt","je","hlt","var"]
+instructions_dict={"add":"10000","sub":"10001","mov":"10010","ld":"10100","st":"10101","mul":"10110","div":"10111","rs":"11000","ls":"11001","xor":"11010","or":"11011","and":"11100","not":"11101","cmp":"11110","jmp":"11111","jlt":"01100","jgt":"01101","je":"01111","hlt":"01010","addf":"00000","subf":"00001","movf":"00010"}
+instructions=["add","sub","mov","ld","st","mul","div","rs","ls","xor","or","and","not","cmp","jmp","jlt","jgt","je","hlt","var","addf","subf","movf"]
 register_dict={"R0":"000","R1":"001","R2":"010","R3":"011","R4":"100","R5":"101","R6":"110"}
 register_dict_FLAGS={"R0":"000","R1":"001","R2":"010","R3":"011","R4":"100","R5":"101","R6":"110","FLAGS":"111"} #includes FLAGS
 #for different binary value of mov as C type
-instructions_dict_C={"add":"10000","sub":"10001","mov":"10011","ld":"10100","st":"10101","mul":"10110","div":"10111","rs":"11000","ls":"11001","xor":"11010","or":"11011","and":"11100","not":"11101","cmp":"11110","jmp":"11111","jlt":"01100","jgt":"01101","je":"01111","hlt":"01010"}
+instructions_dict_C={"add":"10000","sub":"10001","mov":"10011","ld":"10100","st":"10101","mul":"10110","div":"10111","rs":"11000","ls":"11001","xor":"11010","or":"11011","and":"11100","not":"11101","cmp":"11110","jmp":"11111","jlt":"01100","jgt":"01101","je":"01111","hlt":"01010","addf":"00000","subf":"00001","movf":"00010"}
 # 3 label_name : add R1 R2 R3
 # 30 jmp label_name
 
@@ -47,8 +47,8 @@ def binary(n):
         out+=str(temp%2)
         temp=temp//2
     return out[::-1]
-
 #function for converting an integer value to binary string value
+
 def binary_int(n):
     out=""
     temp = n
@@ -56,6 +56,61 @@ def binary_int(n):
         out+=str(temp%2)
         temp=temp//2
     return out[::-1]
+
+def float_conv(a):
+    temp = int(a//1)
+    temp_dec = a - temp
+    i = 0
+    j = 0
+    out1=""
+    out2=""
+    while temp>0:
+        out1+=str(temp%2)
+        temp=temp//2
+        i+=1
+    while j<5:
+        temp_dec*=2
+        temp2=str(temp_dec)
+        out2+=str(temp2[0])
+        if temp_dec>=1:
+            temp_dec-=1
+        j+=1
+    return (out1[::-1]+out2)
+
+def int_float(a):
+    temp = int(a//1)
+    i = 0
+    out = ""
+    while temp>0:
+        out+=str(temp%2)
+        temp=temp//2
+        i+=1
+    return out[::-1]
+
+def dec_float(a):
+    temp = a-int(a//1)
+    i=0
+    out=""
+    while temp>0 and i<5:
+        temp*=2
+        temp1 = str(temp)
+        out+=str(temp1[0])
+        if temp>=1:
+            temp-=1
+        i+=1
+    return out
+def bin(a):
+    out=""
+    for i in range(3):
+        out+=str(a%2)
+        a=int(a//2)
+    return out[::-1]
+def corrected(a):
+    outt=(int_float(a)+dec_float(a))[1:]
+    for i in range(5-len(outt)):
+        outt+="0"
+    return bin(len(int_float(a))+2)+outt
+
 lines = [] #for taking input
 temp=[]
 # while True:
@@ -73,8 +128,6 @@ for i in range(len(temp)):
         lines.append(temp[i])
 #print(lines)
 		
-
-
 text = '\n'.join(lines)
 #print(text)
 #print(type(text))
@@ -103,8 +156,8 @@ label_dict={} #dictionary of labels with their corresponding memory address
 count_instructions=0 #counts the number of instructions
 line_number=0 #counts the number of lines
 
-opcodeA_list=["add","sub","mul","xor","or","and"]
-opcodeB_list=["mov","ls","rs"]
+opcodeA_list=["add","sub","mul","xor","or","and","addf","subf"]
+opcodeB_list=["mov","ls","rs","movf"]
 opcodeC_list=["mov","div","not","cmp"]
 opcodeD_list=["ld","st"]
 opcodeE_list=["jmp","jlt","jgt","je"]
@@ -183,11 +236,7 @@ def opcode_B(list_input,line_number):
         error_dict[line_number]="Register not defined; line "+str(line_number)
         global_error_flag=1
         return
-    if ("." in list_input[2][1:]):
-        error_dict[line_number]="Float values not allowed; line "+str(line_number)
-        global_error_flag=1
-        return
-    if(int(list_input[2][1:])<0 or int(list_input[2][1:])>255):
+    if(float(list_input[2][1:])<0 or float(list_input[2][1:])>255):
         error_dict[line_number]="Immediate value out of range; line "+str(line_number)
         global_error_flag=1
         return
@@ -196,7 +245,7 @@ def opcode_B(list_input,line_number):
         global_error_flag=1
         return
 
-    return instructions_dict[list_input[0]] + register_dict[list_input[1]] + binary(list_input[2])
+    return instructions_dict[list_input[0]] + register_dict[list_input[1]] + corrected(float(list_input[2][1:]))
 
 def opcode_C(list_input,line_number):
     if((list_input[1] or list_input[2]) not in register_dict):
@@ -405,7 +454,7 @@ i=halt_index+1
 while_flag=0
 while(i<len(input_list) and while_flag==0):
     if input_list[i]!="just_an_empty_line_69420":
-        #print(input_list[i])
+        print(input_list[i])
         error_dict[line_number+1]="Halt not used as last instruction; line "+str(line_number)
         while_flag=1
     i+=1
