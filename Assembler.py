@@ -56,6 +56,56 @@ def binary_int(n):
         out+=str(temp%2)
         temp=temp//2
     return out[::-1]
+def bin_to_float(al):
+    exp = 0
+    a = str(al)
+    for i in range(3):
+        exp+=(2**i)*int(a[2-i])
+    if exp<=5:
+        temp = "1"+a[3:]
+    elif exp==6:
+        temp = "1"+a[3:]+"0"
+    elif exp==7:
+        temp = "1"+a[3:]+"00"
+    whole = temp[:exp+1]
+    frac = temp[exp+1:]
+    out = 0
+    outf = 0.0
+    for i in range(len(whole)):
+        out+=(2**i)*int(whole[len(whole)-i-1])
+    for i in range(len(frac)):
+        outf+=(2**(-(i+1)))*int(frac[i])
+    return out+outf
+
+out = []
+tempp=["0", "1"]
+cases = []
+temp2=["000", "001", "010", "011", "100", "101", "110", "111"]
+for i in range(2):
+    for j in range(2):
+        for k in range(2):
+            for l in range(2):
+                for m in range(2):
+                    cases.append(tempp[i]+tempp[j]+tempp[k]+tempp[l]+tempp[m])
+for i in range(len(cases)):
+    for j in range(len(temp2)):
+        out.append(temp2[j]+cases[i])
+outlist=[]
+for i in range(len(out)):
+    outlist.append(bin_to_float(out[i]))
+
+float_list = outlist
+float_list_bin = out
+
+rep_dic = {}
+for i in range(len(out)):
+    rep_dic[out[i]]=outlist[i]
+#print(rep_dic)
+
+ref_dic = {}
+for i in range(len(out)):
+    ref_dic[outlist[i]]=out[i]
+#print(ref_dic)
 
 def float_conv(a):
     temp = int(a//1)
@@ -109,7 +159,7 @@ def corrected(a):
     outt=(int_float(a)+dec_float(a))[1:]
     for i in range(5-len(outt)):
         outt+="0"
-    return bin(len(int_float(a))-1)+outt
+    return bin(len(int_float(a))+2)+outt
 
 lines = [] #for taking input
 temp=[]
@@ -244,12 +294,19 @@ def opcode_B(list_input,line_number):
         error_dict[line_number]="Illegal use of flags; line "+str(line_number)
         global_error_flag=1
         return
-
-    if '.' not in list_input[2][1:]:
+    if("." in list_input[2] and float(list_input[2][1:]) in outlist and list_input[0]=="movf"):
+        return instructions_dict[list_input[0]] + register_dict[list_input[1]] + ref_dic[float(list_input[2][1:])]
+    elif("." in list_input[2] and float(list_input[2][1:]) not in outlist and list_input[0]=="movf"):
+        error_dict[line_number]="Number cannot be represented in the given representation; line "+str(line_number)
+        global_error_flag=1
+        return
+    if(list_input[0]=="mov" and "." not in list_input[2]):
         return instructions_dict[list_input[0]] + register_dict[list_input[1]] + binary(list_input[2])
-
-    return instructions_dict[list_input[0]] + register_dict[list_input[1]] + corrected(float(list_input[2][1:]))
-
+    elif(list_input[0]=="mov" and "." in list_input[2]):
+        error_dict[line_number]="Incorrect datatype; line "+str(line_number)
+        global_error_flag=1
+        return
+    return instructions_dict[list_input[0]] + register_dict[list_input[1]] + binary(list_input[2])
 def opcode_C(list_input,line_number):
     if((list_input[1] or list_input[2]) not in register_dict_FLAGS):
         error_dict[line_number]="Register not defined; line "+str(line_number)
